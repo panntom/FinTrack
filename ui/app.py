@@ -168,7 +168,7 @@ class AddTransactionDialog(tk.Toplevel):
         # ── Save button ────────────────────────────────────────
         tk.Button(
             self, text="💾  Save Transaction",
-            font=FONT_H2, bg=ACCENT, fg="white",
+            font=FONT_H2, bg=ACCENT, fg="black",
             relief="flat", padx=20, pady=8,
             cursor="hand2",
             command=self.__save
@@ -445,7 +445,7 @@ class FinTrackApp(tk.Tk):
 
         tk.Button(
             btn_frame, text="➕  Add Transaction",
-            font=FONT_BODY, bg=GREEN, fg="white",
+            font=FONT_BODY, bg=GREEN, fg="black",
             relief="flat", padx=12, pady=6,
             cursor="hand2",
             command=self.__open_add_dialog
@@ -453,7 +453,7 @@ class FinTrackApp(tk.Tk):
 
         tk.Button(
             btn_frame, text="🗑  Delete Selected",
-            font=FONT_BODY, bg=RED, fg="white",
+            font=FONT_BODY, bg=RED, fg="black",
             relief="flat", padx=12, pady=6,
             cursor="hand2",
             command=self.__delete_selected
@@ -461,7 +461,7 @@ class FinTrackApp(tk.Tk):
 
         tk.Button(
             btn_frame, text="🔄  Refresh",
-            font=FONT_BODY, bg=BG_PANEL, fg=TEXT_MAIN,
+            font=FONT_BODY, bg=BG_PANEL, fg="black",
             relief="flat", padx=12, pady=6,
             cursor="hand2",
             command=self.__refresh_dashboard
@@ -933,7 +933,7 @@ class FinTrackApp(tk.Tk):
 
         tk.Button(
             form, text="💾 Save Budget",
-            font=FONT_BODY, bg=ACCENT, fg="white",
+            font=FONT_BODY, bg=ACCENT, fg="black",
             relief="flat", padx=10, pady=5,
             cursor="hand2",
             command=self.__save_budget
