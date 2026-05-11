@@ -614,24 +614,283 @@ class FinTrackApp(tk.Tk):
     # ── REPORTS TAB (built by Bob in Bước 7) ───────────────────
 
     def __build_reports_tab(self):
-        """Placeholder — Bob will fill this in Bước 7."""
-        self.__reports_content = tk.Frame(self.__tab_reports, bg=BG_DARK)
-        self.__reports_content.pack(fill="both", expand=True)
+        """Build the reports tab with needs/wants + category histogram."""
+        tab = self.__tab_reports
+
+        tk.Label(
+            tab, text="📈 Spending Reports", font=FONT_H1,
+            bg=BG_DARK, fg=TEXT_MAIN
+        ).pack(pady=15)
+
+        # Needs vs Wants summary
+        self.__nw_frame = tk.LabelFrame(
+            tab, text="Needs vs Wants Breakdown", font=FONT_BODY,
+            bg=BG_DARK, fg=TEXT_SUB, padx=15, pady=10
+        )
+        self.__nw_frame.pack(fill="x", padx=30, pady=5)
+
+        # Category histogram area
+        tk.Label(
+            tab, text="Spending by Category (Histogram):", font=FONT_H2,
+            bg=BG_DARK, fg=TEXT_MAIN
+        ).pack(pady=(15, 0))
+
+        self.__hist_frame = tk.Frame(tab, bg=BG_DARK)
+        self.__hist_frame.pack(fill="both", expand=True, padx=30, pady=5)
 
     def __refresh_reports(self):
-        """Placeholder — Bob will fill this in Bước 7."""
-        pass
+        """Refresh all report data and rebuild the display."""
+        self.__status.set("Loading reports...", YELLOW)
+
+        # ── Clear existing widgets ─────────────────────────────
+        for w in self.__nw_frame.winfo_children():
+            w.destroy()
+        for w in self.__hist_frame.winfo_children():
+            w.destroy()
+
+        # ── Needs vs Wants ─────────────────────────────────────
+        nw = self.__manager.get_needs_vs_wants()
+        total = nw["total"] if nw["total"] > 0 else 1
+
+        needs_pct = round((nw["needs"] / total) * 100, 1)
+        wants_pct = round((nw["wants"] / total) * 100, 1)
+
+        # Needs row
+        tk.Label(
+            self.__nw_frame,
+            text=f"✅  Needs:   £{nw['needs']:.2f}  ({needs_pct}%)",
+            font=FONT_H2, bg=BG_DARK, fg=GREEN
+        ).pack(anchor="w", pady=3)
+
+        needs_bar = tk.Canvas(
+            self.__nw_frame, height=18, width=400,
+            bg=BG_PANEL, highlightthickness=0
+        )
+        needs_bar.pack(anchor="w", pady=2)
+        needs_fill = int(400 * needs_pct / 100)
+        needs_bar.create_rectangle(0, 0, needs_fill, 18,
+                                   fill=GREEN, outline="")
+
+        # Wants row
+        tk.Label(
+            self.__nw_frame,
+            text=f"🛍  Wants:   £{nw['wants']:.2f}  ({wants_pct}%)",
+            font=FONT_H2, bg=BG_DARK, fg=YELLOW
+        ).pack(anchor="w", pady=3)
+
+        wants_bar = tk.Canvas(
+            self.__nw_frame, height=18, width=400,
+            bg=BG_PANEL, highlightthickness=0
+        )
+        wants_bar.pack(anchor="w", pady=2)
+        wants_fill = int(400 * wants_pct / 100)
+        wants_bar.create_rectangle(0, 0, wants_fill, 18,
+                                   fill=YELLOW, outline="")
+
+        # Total
+        tk.Label(
+            self.__nw_frame,
+            text=f"Total Expenses: £{nw['total']:.2f}",
+            font=FONT_BODY, bg=BG_DARK, fg=TEXT_SUB
+        ).pack(anchor="e", pady=5)
+
+        # ── Category Histogram ─────────────────────────────────
+        spending = self.__manager.get_spending_by_category()
+
+        if not spending:
+            tk.Label(
+                self.__hist_frame,
+                text="No expense data yet. Add some expenses first.",
+                font=FONT_BODY, bg=BG_DARK, fg=TEXT_SUB
+            ).pack(pady=20)
+            self.__status.set("Reports loaded. No expense data yet.", TEXT_SUB)
+            return
+
+        max_amount = max(spending.values())
+
+        HIST_COLOURS = [
+            "#7c3aed", "#2563eb", "#059669",
+            "#d97706", "#dc2626", "#7c3aed",
+            "#0891b2", "#65a30d"
+        ]
+
+        for i, (category, amount) in enumerate(
+            sorted(spending.items(), key=lambda x: x[1], reverse=True)
+        ):
+            row = tk.Frame(self.__hist_frame, bg=BG_DARK)
+            row.pack(fill="x", pady=2)
+
+            # Category label (fixed width)
+            tk.Label(
+                row, text=category, font=FONT_BODY,
+                bg=BG_DARK, fg=TEXT_MAIN,
+                width=14, anchor="e"
+            ).pack(side="left", padx=(0, 8))
+
+            # Bar
+            bar_w = int(350 * amount / max_amount)
+            bar = tk.Canvas(
+                row, height=20, width=350,
+                bg=BG_PANEL, highlightthickness=0
+            )
+            bar.pack(side="left")
+            bar.create_rectangle(
+                0, 0, bar_w, 20,
+                fill=HIST_COLOURS[i % len(HIST_COLOURS)],
+                outline=""
+            )
+
+            # Amount label
+            tk.Label(
+                row, text=f"£{amount:.2f}",
+                font=FONT_BODY, bg=BG_DARK, fg=TEXT_SUB
+            ).pack(side="left", padx=8)
+
+        self.__status.set("✓ Reports loaded successfully.", GREEN)
 
     # ── FORECAST TAB (built by Bob in Bước 7) ──────────────────
-
     def __build_forecast_tab(self):
-        """Placeholder — Bob will fill this in Bước 7."""
-        self.__forecast_content = tk.Frame(self.__tab_forecast, bg=BG_DARK)
-        self.__forecast_content.pack(fill="both", expand=True)
+        """Build the 30-day forecast tab."""
+        tab = self.__tab_forecast
+
+        tk.Label(
+            tab, text="🔮 30-Day Financial Forecast", font=FONT_H1,
+            bg=BG_DARK, fg=TEXT_MAIN
+        ).pack(pady=15)
+
+        # Summary cards row
+        cards = tk.Frame(tab, bg=BG_DARK)
+        cards.pack(fill="x", padx=20, pady=5)
+
+        self.__fc_current_label   = self.__make_card(
+            cards, "Current Balance", "£0.00", GREEN
+        )
+        self.__fc_projected_label = self.__make_card(
+            cards, "Projected Balance (30d)", "£0.00", ACCENT
+        )
+
+        # Warning label
+        self.__fc_warning_label = tk.Label(
+            tab, text="", font=FONT_H2,
+            bg=BG_DARK, fg=RED
+        )
+        self.__fc_warning_label.pack(pady=5)
+
+        # Monthly summary
+        self.__fc_monthly_label = tk.Label(
+            tab, text="", font=FONT_BODY,
+            bg=BG_DARK, fg=TEXT_SUB
+        )
+        self.__fc_monthly_label.pack()
+
+        # Events list header
+        tk.Label(
+            tab, text="Upcoming Bills in Next 30 Days:",
+            font=FONT_H2, bg=BG_DARK, fg=TEXT_MAIN
+        ).pack(pady=(15, 0))
+
+        # Events treeview
+        list_frame = tk.Frame(tab, bg=BG_DARK)
+        list_frame.pack(fill="both", expand=True, padx=30, pady=8)
+
+        cols = ("date", "days_away", "description", "amount", "balance_after")
+        self.__fc_tree = ttk.Treeview(
+            list_frame, columns=cols, show="headings", height=10
+        )
+        self.__fc_tree.heading("date",         text="Date")
+        self.__fc_tree.heading("days_away",    text="Days Away")
+        self.__fc_tree.heading("description",  text="Bill")
+        self.__fc_tree.heading("amount",       text="Amount")
+        self.__fc_tree.heading("balance_after",text="Balance After")
+
+        self.__fc_tree.column("date",         width=100, anchor="center")
+        self.__fc_tree.column("days_away",    width=90,  anchor="center")
+        self.__fc_tree.column("description",  width=220)
+        self.__fc_tree.column("amount",       width=100, anchor="e")
+        self.__fc_tree.column("balance_after",width=120, anchor="e")
+
+        fc_scroll = ttk.Scrollbar(
+            list_frame, orient="vertical",
+            command=self.__fc_tree.yview
+        )
+        self.__fc_tree.configure(yscrollcommand=fc_scroll.set)
+        self.__fc_tree.pack(side="left", fill="both", expand=True)
+        fc_scroll.pack(side="right", fill="y")
 
     def __refresh_forecast(self):
-        """Placeholder — Bob will fill this in Bước 7."""
-        pass
+        """Refresh the 30-day forecast data."""
+        self.__status.set("Calculating forecast...", YELLOW)
+
+        result = self.__forecaster.forecast_30_days()
+        monthly = self.__forecaster.get_monthly_summary()
+
+        # Update summary cards
+        current   = result["current_balance"]
+        projected = result["projected_balance"]
+
+        self.__fc_current_label.config(
+            text=f"£{current:.2f}",
+            fg=GREEN if current >= 0 else RED
+        )
+        self.__fc_projected_label.config(
+            text=f"£{projected:.2f}",
+            fg=GREEN if projected >= 0 else RED
+        )
+
+        # Warning messages
+        if result["warning"]:
+            self.__fc_warning_label.config(
+                text="⚠ WARNING: Your balance will go NEGATIVE in 30 days!",
+                fg=RED
+            )
+        elif result["warning_low"]:
+            self.__fc_warning_label.config(
+                text="⚠ Caution: Your balance will drop below £50.",
+                fg=YELLOW
+            )
+        else:
+            self.__fc_warning_label.config(
+                text="✓ Your balance looks healthy for the next 30 days.",
+                fg=GREEN
+            )
+
+        # Monthly summary
+        self.__fc_monthly_label.config(
+            text=(
+                f"Avg Monthly Income: £{monthly['avg_monthly_income']:.2f}  |  "
+                f"Avg Monthly Expenses: £{monthly['avg_monthly_expenses']:.2f}  |  "
+                f"Monthly Surplus: £{monthly['monthly_surplus']:.2f}"
+            ),
+            fg=GREEN if monthly["monthly_surplus"] >= 0 else RED
+        )
+
+        # Populate events table
+        self.__fc_tree.delete(*self.__fc_tree.get_children())
+
+        if not result["events"]:
+            self.__fc_tree.insert("", "end", values=(
+                "—", "—", "No recurring bills due in 30 days", "—", "—"
+            ))
+        else:
+            for event in result["events"]:
+                bal_colour_tag = (
+                    "negative" if event["balance_after"] < 0
+                    else "low" if event["balance_after"] < 50
+                    else "ok"
+                )
+                self.__fc_tree.insert("", "end", values=(
+                    event["date"],
+                    f"{event['days_away']} days",
+                    event["description"],
+                    f"£{event['amount']:.2f}",
+                    f"£{event['balance_after']:.2f}",
+                ), tags=(bal_colour_tag,))
+
+        self.__fc_tree.tag_configure("negative", foreground=RED)
+        self.__fc_tree.tag_configure("low",      foreground=YELLOW)
+        self.__fc_tree.tag_configure("ok",        foreground=GREEN)
+
+        self.__status.set("✓ Forecast calculated.", GREEN)
 
     # ── BUDGETS TAB ────────────────────────────────────────────
 
