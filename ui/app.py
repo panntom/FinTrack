@@ -115,7 +115,7 @@ class AddTransactionDialog(tk.Toplevel):
         shared_frame.pack(fill="x", padx=20, pady=10)
 
         # Amount
-        tk.Label(shared_frame, text="Amount (£):", font=FONT_BODY,
+        tk.Label(shared_frame, text="Amount ($):", font=FONT_BODY,
                  bg=BG_DARK, fg=TEXT_MAIN).grid(row=0, column=0, sticky="w", pady=4)
         self.__amount_var = tk.StringVar()
         tk.Entry(shared_frame, textvariable=self.__amount_var,
@@ -305,10 +305,10 @@ class AddTransactionDialog(tk.Toplevel):
                         proceed = messagebox.askyesno(
                             "⚠ Budget Alert",
                             f"This expense will exceed your "
-                            f"{self.__category_var.get()} budget by £{over}!\n\n"
-                            f"Budget: £{alert['limit']:.2f}\n"
-                            f"Already spent: £{alert['spent']:.2f}\n"
-                            f"This expense: £{float(amount):.2f}\n\n"
+                            f"{self.__category_var.get()} budget by ${over}!\n\n"
+                            f"Budget: ${alert['limit']:.2f}\n"
+                            f"Already spent: ${alert['spent']:.2f}\n"
+                            f"This expense: ${float(amount):.2f}\n\n"
                             "Do you still want to add it?"
                         )
                         if not proceed:
@@ -435,9 +435,9 @@ class FinTrackApp(tk.Tk):
         cards_frame = tk.Frame(tab, bg=BG_DARK)
         cards_frame.pack(fill="x", padx=20, pady=15)
 
-        self.__income_label  = self.__make_card(cards_frame, "Total Income", "£0.00", GREEN)
-        self.__expense_label = self.__make_card(cards_frame, "Total Expenses", "£0.00", RED)
-        self.__balance_label = self.__make_card(cards_frame, "Balance", "£0.00", ACCENT)
+        self.__income_label  = self.__make_card(cards_frame, "Total Income", "$0.00", GREEN)
+        self.__expense_label = self.__make_card(cards_frame, "Total Expenses", "$0.00", RED)
+        self.__balance_label = self.__make_card(cards_frame, "Balance", "$0.00", ACCENT)
 
         # Buttons row
         btn_frame = tk.Frame(tab, bg=BG_DARK)
@@ -482,7 +482,7 @@ class FinTrackApp(tk.Tk):
         self.__tree.heading("date",        text="Date")
         self.__tree.heading("type",        text="Type")
         self.__tree.heading("description", text="Description")
-        self.__tree.heading("amount",      text="Amount (£)")
+        self.__tree.heading("amount",      text="Amount ($)")
 
         # Column widths
         self.__tree.column("id",          width=80,  anchor="center")
@@ -523,12 +523,12 @@ class FinTrackApp(tk.Tk):
         expense = self.__manager.get_total_expenses()
         balance = self.__manager.get_current_balance()
 
-        self.__income_label.config(text=f"£{income:.2f}")
-        self.__expense_label.config(text=f"£{expense:.2f}")
+        self.__income_label.config(text=f"${income:.2f}")
+        self.__expense_label.config(text=f"${expense:.2f}")
 
         bal_colour = GREEN if balance >= 0 else RED
         self.__balance_label.config(
-            text=f"£{balance:.2f}", fg=bal_colour
+            text=f"${balance:.2f}", fg=bal_colour
         )
 
         # Update transaction list
@@ -548,7 +548,7 @@ class FinTrackApp(tk.Tk):
                 t.get_date(),
                 t_type,
                 t.get_description(),
-                f"£{t.get_amount():.2f}",
+                f"${t.get_amount():.2f}",
             ), tags=(tag,))
 
         # Row colours
@@ -658,7 +658,7 @@ class FinTrackApp(tk.Tk):
         # Needs row
         tk.Label(
             self.__nw_frame,
-            text=f"✅  Needs:   £{nw['needs']:.2f}  ({needs_pct}%)",
+            text=f"✅  Needs:   ${nw['needs']:.2f}  ({needs_pct}%)",
             font=FONT_H2, bg=BG_DARK, fg=GREEN
         ).pack(anchor="w", pady=3)
 
@@ -674,7 +674,7 @@ class FinTrackApp(tk.Tk):
         # Wants row
         tk.Label(
             self.__nw_frame,
-            text=f"🛍  Wants:   £{nw['wants']:.2f}  ({wants_pct}%)",
+            text=f"🛍  Wants:   ${nw['wants']:.2f}  ({wants_pct}%)",
             font=FONT_H2, bg=BG_DARK, fg=YELLOW
         ).pack(anchor="w", pady=3)
 
@@ -690,7 +690,7 @@ class FinTrackApp(tk.Tk):
         # Total
         tk.Label(
             self.__nw_frame,
-            text=f"Total Expenses: £{nw['total']:.2f}",
+            text=f"Total Expenses: ${nw['total']:.2f}",
             font=FONT_BODY, bg=BG_DARK, fg=TEXT_SUB
         ).pack(anchor="e", pady=5)
 
@@ -742,7 +742,7 @@ class FinTrackApp(tk.Tk):
 
             # Amount label
             tk.Label(
-                row, text=f"£{amount:.2f}",
+                row, text=f"${amount:.2f}",
                 font=FONT_BODY, bg=BG_DARK, fg=TEXT_SUB
             ).pack(side="left", padx=8)
 
@@ -763,10 +763,10 @@ class FinTrackApp(tk.Tk):
         cards.pack(fill="x", padx=20, pady=5)
 
         self.__fc_current_label   = self.__make_card(
-            cards, "Current Balance", "£0.00", GREEN
+            cards, "Current Balance", "$0.00", GREEN
         )
         self.__fc_projected_label = self.__make_card(
-            cards, "Projected Balance (30d)", "£0.00", ACCENT
+            cards, "Projected Balance (30d)", "$0.00", ACCENT
         )
 
         # Warning label
@@ -829,11 +829,11 @@ class FinTrackApp(tk.Tk):
         projected = result["projected_balance"]
 
         self.__fc_current_label.config(
-            text=f"£{current:.2f}",
+            text=f"${current:.2f}",
             fg=GREEN if current >= 0 else RED
         )
         self.__fc_projected_label.config(
-            text=f"£{projected:.2f}",
+            text=f"${projected:.2f}",
             fg=GREEN if projected >= 0 else RED
         )
 
@@ -845,7 +845,7 @@ class FinTrackApp(tk.Tk):
             )
         elif result["warning_low"]:
             self.__fc_warning_label.config(
-                text="⚠ Caution: Your balance will drop below £50.",
+                text="⚠ Caution: Your balance will drop below $50.",
                 fg=YELLOW
             )
         else:
@@ -857,9 +857,9 @@ class FinTrackApp(tk.Tk):
         # Monthly summary
         self.__fc_monthly_label.config(
             text=(
-                f"Avg Monthly Income: £{monthly['avg_monthly_income']:.2f}  |  "
-                f"Avg Monthly Expenses: £{monthly['avg_monthly_expenses']:.2f}  |  "
-                f"Monthly Surplus: £{monthly['monthly_surplus']:.2f}"
+                f"Avg Monthly Income: ${monthly['avg_monthly_income']:.2f}  |  "
+                f"Avg Monthly Expenses: ${monthly['avg_monthly_expenses']:.2f}  |  "
+                f"Monthly Surplus: ${monthly['monthly_surplus']:.2f}"
             ),
             fg=GREEN if monthly["monthly_surplus"] >= 0 else RED
         )
@@ -882,8 +882,8 @@ class FinTrackApp(tk.Tk):
                     event["date"],
                     f"{event['days_away']} days",
                     event["description"],
-                    f"£{event['amount']:.2f}",
-                    f"£{event['balance_after']:.2f}",
+                    f"${event['amount']:.2f}",
+                    f"${event['balance_after']:.2f}",
                 ), tags=(bal_colour_tag,))
 
         self.__fc_tree.tag_configure("negative", foreground=RED)
@@ -920,7 +920,7 @@ class FinTrackApp(tk.Tk):
             state="readonly", width=20
         ).grid(row=0, column=1, padx=10)
 
-        tk.Label(form, text="Limit (£):", font=FONT_BODY,
+        tk.Label(form, text="Limit ($):", font=FONT_BODY,
                  bg=BG_DARK, fg=TEXT_MAIN).grid(row=1, column=0, sticky="w", pady=5)
         self.__budget_limit_var = tk.StringVar()
         tk.Entry(form, textvariable=self.__budget_limit_var,
@@ -960,7 +960,7 @@ class FinTrackApp(tk.Tk):
         try:
             self.__manager.set_budget(category, limit)
             self.__status.set(
-                f"✓ Budget saved: {category} = £{float(limit):.2f}", GREEN
+                f"✓ Budget saved: {category} = ${float(limit):.2f}", GREEN
             )
             self.__refresh_budgets()
         except ValueError as e:
@@ -1000,7 +1000,7 @@ class FinTrackApp(tk.Tk):
             colour = RED if over else (YELLOW if percent > 80 else GREEN)
             tk.Label(
                 row,
-                text=f"£{spent:.2f} / £{limit:.2f}  ({percent:.0f}%)",
+                text=f"${spent:.2f} / ${limit:.2f}  ({percent:.0f}%)",
                 font=FONT_BODY, bg=BG_PANEL, fg=colour
             ).pack(side="left", padx=10)
 

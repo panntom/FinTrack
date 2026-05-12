@@ -55,7 +55,7 @@ class Transaction:
         return (
             f"[ID: {self.__id}] "
             f"{self.__date} | "
-            f"£{self.__amount:.2f} | "
+            f"${self.__amount:.2f} | "
             f"{self.__description}"
         )
     def to_dict(self):
