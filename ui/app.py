@@ -325,11 +325,10 @@ class AddTransactionDialog(tk.Toplevel):
                     next_due_date=due_date,
                     date=date_str if date_str else None
                 )
-
             # ── All good — save it ─────────────────────────────
             self.__manager.add_transaction(transaction)
-            self.__on_success()   # Refresh the main window
-            self.destroy()        # Close dialog
+            self.destroy()        # Close dialog FIRST
+            self.__on_success()   # THEN refresh + show status
 
         except ValueError as e:
             # Show the validation error from our model setters
@@ -565,10 +564,14 @@ class FinTrackApp(tk.Tk):
             )
         else:
             self.__status.set("✓ Dashboard loaded successfully.", GREEN)
-
     def __open_add_dialog(self):
         """Open the Add Transaction dialog."""
-        AddTransactionDialog(self, self.__manager, self.__refresh_dashboard)
+        def on_success():
+            self.__refresh_dashboard()
+            self.__status.set("✓ Transaction added successfully.", GREEN)
+            messagebox.showinfo("Success", "Transaction added successfully!")
+
+        AddTransactionDialog(self, self.__manager, on_success)
 
     def __delete_selected(self):
         """Delete the selected transaction from the list."""
